@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font: 16px Arial;  
+}
+
+/*Su posición es relativa*/
+.autocomplete {
+  position: relative;
+  display: inline-block;
+}
+
+input {
+  border: 1px solid transparent;
+  background-color: #f1f1f1;
+  padding: 10px;
+  font-size: 16px;
+}
+
+/*Recuadro de input*/
+input[type=text] {
+  background-color: #f1f1f1;
+  width: 100%;
+}
+
+/*Recuadro de Enviar*/
+input[type=submit] {
+  background-color: DodgerBlue;
+  color: #fff;
+  cursor: pointer;
+}
+
+
+/**/
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  /*Los items autocompletados tiene el mismo ancho que el recuadro del input:*/
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+
+/*Recuadros de opciones de autocompletado*/
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff; 
+  border-bottom: 1px solid #d4d4d4; 
+}
+
+/*Cuando pasas el mouse encima de una opción*/
+.autocomplete-items div:hover {
+  background-color: #e9e910; 
+}
+
+/*Cuando pasas con las flechas encima de la opción*/
+.autocomplete-active {
+  background-color: DodgerBlue !important; 
+  color: #ffffff; 
+}
+</style>
+</head>     
+<body>
+
+<h2>Autocompletado</h2>
+
+<p>Escriba un país por favor</p>
+
+<!--Nos aseguramos que este desactivado el autocompletado del formulario-->
+<form autocomplete="off" action="/action_page.php">
+  <div class="autocomplete" style="width:300px;">
+    <input id="myInput" type="text" name="myCountry" placeholder="País">
+  </div>
+  <input type="submit">
+</form>
+
+<script>
+function autocomplete(inp, arr) {
+  /*La función de autocompletado tiene 2 argumentos
+  el primero es la entrada que se escribe y el segundo el arreglo
+  que contiene los posibles valores*/
+  var currentFocus;
+  /*Ejecutamos la siguiente función cuando alguien escribe*/
+  inp.addEventListener("input", function(e) {
+      var a, b, i, val = this.value;
+      /*Cierra listas de valores previamente completados*/
+      closeAllLists();
+      if (!val) { return false;}
+      currentFocus = -1;
+      /*Crea un elemento DIV que contrendra los items (valores):*/
+      a = document.createElement("DIV");
+      a.setAttribute("id", this.id + "autocomplete-list");
+      a.setAttribute("class", "autocomplete-items");
+      /*Añade el elemento DIV como hijo del contenedor de autocompletado:*/
+      this.parentNode.appendChild(a);
+      /*Por cada item del arreglo*/
+      for (i = 0; i < arr.length; i++) {
+        /*Verifica si el item inicia con las mismas letras que la entrada:*/
+        if (arr[i].substr(0, val.length).toUpperCase() == val.toUpperCase()) {
+          /*Crea un elemento DIV element por cada elemento coincidente:*/
+          b = document.createElement("DIV");
+          /*Resalta las coincidencias con negritas:*/
+          b.innerHTML = "<strong>" + arr[i].substr(0, val.length) + "</strong>";
+          b.innerHTML += arr[i].substr(val.length);
+          /*Inserta un campo que mantiene el valor coincidente del arreglo actual:*/
+          b.innerHTML += "<input type='hidden' value='" + arr[i] + "'>";
+          /*Ejecuta una función cuando se la da click a algúna coincidencia (elemnto DIV):*/
+          b.addEventListener("click", function(e) {
+              /*Inserta el valor para el campo de autocompletado:*/
+              inp.value = this.getElementsByTagName("input")[0].value;
+              /*cierra la lista de valores autocompletados (cierra el resto de los DIV's):*/
+              closeAllLists();
+          });
+          a.appendChild(b);
+        }
+      }
+  });
+  /*Ejecuta la función al presinoar un tecla:*/
+  inp.addEventListener("keydown", function(e) {
+      var x = document.getElementById(this.id + "autocomplete-list");
+      if (x) x = x.getElementsByTagName("div");
+      if (e.keyCode == 40) {
+        /*Si se presiona la tecla "abajo" 
+		pasa al siguiente item de la lista:*/
+        currentFocus++;
+        /*Resalta el item actual:*/
+        addActive(x);
+      } else if (e.keyCode == 38) { //up
+        /*Si se presiona la tecla "arriba" 
+		pasa al anterior item de la lista:*/
+        currentFocus--;
+        /*Resalta el item actual:*/
+        addActive(x);
+      } else if (e.keyCode == 13) {
+        /*Si se preciona ENTER, este hara nada*/
+        e.preventDefault();
+        if (currentFocus > -1) {
+          /*Simula un click en el item activo:*/
+          if (x) x[currentFocus].click();
+        }
+      }
+  });
+  function addActive(x) {
+    /*Una función que clasifica un item como "active":*/
+    if (!x) return false;
+    /*Comienza removiendo la clase "active" en todos los items:*/
+    removeActive(x);
+    if (currentFocus >= x.length) currentFocus = 0;
+    if (currentFocus < 0) currentFocus = (x.length - 1);
+    /*Añade la clase "autocomplete-active":*/
+    x[currentFocus].classList.add("autocomplete-active");
+  }
+  function removeActive(x) {
+    /*Una función que remueve la clase "activa" a todos los autocompletados:*/
+    for (var i = 0; i < x.length; i++) {
+      x[i].classList.remove("autocomplete-active");
+    }
+  }
+  function closeAllLists(elmnt) {
+    /*Cierra todos los autocompletados
+	excepto por el seleccionado:*/
+    var x = document.getElementsByClassName("autocomplete-items");
+    for (var i = 0; i < x.length; i++) {
+      if (elmnt != x[i] && elmnt != inp) {
+        x[i].parentNode.removeChild(x[i]);
+      }
+    }
+  }
+  /*Ejecuta la función cuando alguien hace click en el docmento:*/
+  document.addEventListener("click", function (e) {
+      closeAllLists(e.target);
+  });
+}
+
+/*Un arrelgo que es una lista de los paises del mundo:*/
+var paises = ["Afghanistan","Albania","Algeria","Andorra","Angola","Anguilla","Antigua & Barbuda","Argentina","Armenia","Aruba","Australia","Austria","Azerbaijan","Bahamas","Bahrain","Bangladesh","Barbados","Belarus","Belgium","Belize","Benin","Bermuda","Bhutan","Bolivia","Bosnia & Herzegovina","Botswana","Brazil","British Virgin Islands","Brunei","Bulgaria","Burkina Faso","Burundi","Cambodia","Cameroon","Canada","Cape Verde","Cayman Islands","Central Arfrican Republic","Chad","Chile","China","Colombia","Congo","Cook Islands","Costa Rica","Cote D Ivoire","Croatia","Cuba","Curacao","Cyprus","Czech Republic","Denmark","Djibouti","Dominica","Dominican Republic","Ecuador","Egypt","El Salvador","Equatorial Guinea","Eritrea","Estonia","Ethiopia","Falkland Islands","Faroe Islands","Fiji","Finland","France","French Polynesia","French West Indies","Gabon","Gambia","Georgia","Germany","Ghana","Gibraltar","Greece","Greenland","Grenada","Guam","Guatemala","Guernsey","Guinea","Guinea Bissau","Guyana","Haiti","Honduras","Hong Kong","Hungary","Iceland","India","Indonesia","Iran","Iraq","Ireland","Isle of Man","Israel","Italy","Jamaica","Japan","Jersey","Jordan","Kazakhstan","Kenya","Kiribati","Kosovo","Kuwait","Kyrgyzstan","Laos","Latvia","Lebanon","Lesotho","Liberia","Libya","Liechtenstein","Lithuania","Luxembourg","Macau","Macedonia","Madagascar","Malawi","Malaysia","Maldives","Mali","Malta","Marshall Islands","Mauritania","Mauritius","Mexico","Micronesia","Moldova","Monaco","Mongolia","Montenegro","Montserrat","Morocco","Mozambique","Myanmar","Namibia","Nauro","Nepal","Netherlands","Netherlands Antilles","New Caledonia","New Zealand","Nicaragua","Niger","Nigeria","North Korea","Norway","Oman","Pakistan","Palau","Palestine","Panama","Papua New Guinea","Paraguay","Peru","Philippines","Poland","Portugal","Puerto Rico","Qatar","Reunion","Romania","Russia","Rwanda","Saint Pierre & Miquelon","Samoa","San Marino","Sao Tome and Principe","Saudi Arabia","Senegal","Serbia","Seychelles","Sierra Leone","Singapore","Slovakia","Slovenia","Solomon Islands","Somalia","South Africa","South Korea","South Sudan","Spain","Sri Lanka","St Kitts & Nevis","St Lucia","St Vincent","Sudan","Suriname","Swaziland","Sweden","Switzerland","Syria","Taiwan","Tajikistan","Tanzania","Thailand","Timor L'Este","Togo","Tonga","Trinidad & Tobago","Tunisia","Turkey","Turkmenistan","Turks & Caicos","Tuvalu","Uganda","Ukraine","United Arab Emirates","United Kingdom","United States of America","Uruguay","Uzbekistan","Vanuatu","Vatican City","Venezuela","Vietnam","Virgin Islands (US)","Yemen","Zambia","Zimbabwe"];
+/*Inicia la función de autocompletado con myInput como la entrada y el arreflo de paises con los posibles valores*/
+autocomplete(document.getElementById("myInput"), paises);
+</script>
+
+</body>
+</html>
