@@ -28,14 +28,15 @@ input {
 input[type=text] {
   background-color: #f1f1f1;
   width: 100%;
+  text-align: center;
 }
 
-/*Recuadro de Enviar*/
+/*Recuadro de Enviar
 input[type=submit] {
   background-color: DodgerBlue;
   color: #fff;
   cursor: pointer;
-}
+}*/
 
 
 /**/
@@ -49,6 +50,7 @@ input[type=submit] {
   top: 100%;
   left: 0;
   right: 0;
+  text-align: center;
 }
 
 /*Recuadros de opciones de autocompletado*/
@@ -69,21 +71,29 @@ input[type=submit] {
   background-color: DodgerBlue !important; 
   color: #ffffff; 
 }
+
 </style>
 </head>     
 <body>
 
+<center>
+<br> &nbsp;
+<br> &nbsp;
+<br> &nbsp;
+<br> &nbsp;
 <h2>Autocompletado</h2>
 
 <p>Escriba un país por favor</p>
 
 <!--Nos aseguramos que este desactivado el autocompletado del formulario-->
+
 <form autocomplete="off" action="/action_page.php">
   <div class="autocomplete" style="width:300px;">
     <input id="myInput" type="text" name="myCountry" placeholder="País">
   </div>
-  <input type="submit">
+  <!--<input type="submit">-->
 </form>
+</center>
 
 <script>
 function autocomplete(inp, arr) {
@@ -102,7 +112,7 @@ function autocomplete(inp, arr) {
       a = document.createElement("DIV");
       a.setAttribute("id", this.id + "autocomplete-list");
       a.setAttribute("class", "autocomplete-items");
-      /*Añade el elemento DIV como hijo del contenedor de autocompletado:*/
+      /*Añade el elemento DIV como hijo del contenedor de autocompletado:*/ 
       this.parentNode.appendChild(a);
       /*Por cada item del arreglo*/
       for (i = 0; i < arr.length; i++) {
